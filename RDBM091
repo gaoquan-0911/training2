@@ -1,0 +1,68 @@
+000100 01  K09-REC.                                                             
+000200*                                   * 仕様別実績                          
+000300*                               * REC-SIZE  ( 680BYTE )                   
+000400   02  M09-CTRL.                                                          
+000500*                               * KEY                                     
+000600     03  AB-KOJYO                  PIC  X(01).                            
+000700*                               * 工場                                    
+000800     03  AB-CODE                   PIC  X(05).                            
+000900*                                   * 仕様コード                          
+001000   02  SEISAN-DATE.                                                       
+001100*                                   * 生産年月日                          
+001150     03  SEISAN-YY                 PIC  X(02).                            
+001160     03  SEISAN-MM                 PIC  X(02).                            
+001170     03  SEISAN-DD                 PIC  X(02).                            
+001200   02  KISHU-KIGO.                                                        
+001300*                                   * 機種記号                            
+001400     03  KIHON-KISHU.                                                     
+001500*                                   * 基本機種                            
+001600       04  KIHON                   PIC  X(05).                            
+001700*                               * 機種                                    
+001800       04  GUREIDO                 PIC  X(03).                            
+001900*                               * 仕様                                    
+002000       04  SHIMUKE                 PIC  X(03).                            
+002100*                               * 仕向                                    
+002200     03  HAI-KUBUN                 PIC  X(01).                            
+002300*                               * ﾊｲﾌﾝ                                    
+002400     03  IRO-KUMIKIGO              PIC  X(03).                            
+002500*                               * 色組                                    
+002600     03  SELCTION-ALL.                                                    
+002700*                               * ｾﾚｸｼｮﾝ                                  
+002800       04  SELCTION                OCCURS  30  TIMES.                     
+002900         05  SELCT                 PIC  X(03).                            
+003000   02  COLR                        PIC  X(03).                            
+003100*                                   * 主車色                              
+003200   02  SHORI-POSTION.                                                     
+003300*                                   * 実績ポイント                        
+003400     03  JISEKI-P                  OCCURS  11  TIMES.                     
+003500       04  KOTEI-POSTION           OCCURS  02  TIMES.                     
+003600         05  NON-LINE              PIC  X(01).                            
+003700*                                   * ライン                              
+003800         05  NON-ZENGETS-SHINDO    PIC  S9(05) COMP-3.                    
+003900*                                   * 前月末進度                          
+004000         05  NON-TOTAL-PLAN        PIC  S9(05) COMP-3.                    
+004100*                                   * 当月計画                            
+004200         05  NON-TOTAL-JISEKI      PIC  S9(05) COMP-3.                    
+004300*                                   * 当月実績                            
+004400         05  NON-SHIFT-JISEKI      OCCURS  03  TIMES                      
+004500                                   PIC  S9(03) COMP-3.                    
+004600*                                   * 当日実績                            
+004700   02  SHIYO-BETSU-RYUDOSU.                                               
+004800*                                   * 流動数１                            
+004900     03  RYUDO-CUNT                OCCURS  15  TIMES.                     
+005000       04  RYUDO-POSTION           OCCURS  02  TIMES.                     
+005100         05  KOTEI-LINEN           PIC  X(01).                            
+005200*                                   * ライン                              
+005300         05  KOTEI-RYUDO           PIC  S9(05) COMP-3.                    
+005400*                                   * 流動数                              
+005500   02  FILLER                      PIC  X(24).                            
+005600*                               * 予備                                    
+005700   02  SHIYO-BETSU-RYUDOSU2.                                              
+005800*                                   * 流動数２                            
+005900     03  RYUDO-CUNT2               OCCURS  17  TIMES.                     
+006000       04  RYUDO-POSTION2          PIC  S9(05) COMP-3.                    
+006100*                                   * 流動数                              
+006200   02  FILLER                      PIC  X(07).                            
+006300*                               * 予備                                    
+006400   02  BATCH-UPD-DATE              PIC  X(06).                            
+006500*                                   * ﾊﾞｯﾁ更新年月日                      
