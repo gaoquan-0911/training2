@@ -1,82 +1,83 @@
 ---
-description: "Update a change - revise existing planning artifacts and keep them coherent (Experimental)"
+description: "更新变更 - 修订现有规划制品并保持它们一致（实验性）"
 ---
 
-Revise a change's existing planning artifacts and keep them coherent. Never edit code.
+修订变更的现有规划制品并保持它们之间一致。绝不要编辑代码。
 
-**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `view`). Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+**存储选择：** 若用户指定了一个存储（存储是注册在本机上的独立 OpenSpec 仓库）或工作位于某个存储中，请运行 `openspec-cn store list --json` 发现已注册的存储 ID，然后在读写 spec 和变更的命令上传递 `--store <id>`（`new change`、`status`、`instructions`、`list`、`show`、`validate`、`archive`、`doctor`、`context`、`view`）。选定后，将 `--store <id>` 视为在当前工作流其余部分中固定不变。以下每个未限定范围的命令示例均为简写形式：运行前请追加该标志。例如，运行 `openspec-cn status --change "<name>" --json --store "<id>"`，而非下面展示的未限定形式。其他命令不接受此标志。命令输出的提示已包含该标志；在后续操作中请保留它。若不指定存储，命令将对最近的本地 `openspec/` 根目录生效。
 
-**Input**: Optionally specify a change name after `/opsx-update` (e.g., `/opsx-update add-auth`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**输入**：可选地在 `/opsx-update` 后指定变更名称（例如 `/opsx-update add-auth`）。若省略，检查能否从对话上下文推断。若模糊或歧义，你必须提示用户从可用变更中选择。
 
-**Steps**
+`/opsx-continue` 是一个扩展 profile 工作流，可能未安装。在下方任何地方建议它之前，请验证它是否可用。若不可用，`openspec-cn status --change "<name>" --json` 显示下一个制品，`openspec-cn instructions "<artifact-id>" --change "<name>" --json` 解释如何创建它。
 
-1. **Select the change**
+**步骤**
 
-   If a name is provided, use it. Otherwise:
-   - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, run `openspec list --json` to get available changes sorted by most recently modified, and ask the user to select one
+1. **选择变更**
 
-   When prompting, present the top 3-4 most recently modified changes as options, showing:
-   - Change name
-   - Schema (from `schema` field if present, otherwise "spec-driven")
-   - Status (e.g., "0/5 tasks", "complete", "no tasks")
-   - How recently it was modified (from `lastModified` field)
+   若提供了名称，使用它。否则：
+   - 从对话上下文推断（若用户提到了某个变更）
+   - 若仅有一个活跃变更则自动选择
+   - 若存在歧义，运行 `openspec-cn list --json` 获取按最近修改排序的可用变更，并让用户选择
 
-   Mark the most recently modified change as "(Recommended)" since it's likely what the user wants to update.
+   提示时，展示最近修改的前 3-4 个变更作为选项，显示：
+   - 变更名称
+   - Schema（来自 `schema` 字段，若无则为 "spec-driven"）
+   - 状态（例如 "0/5 tasks"、"complete"、"no tasks"）
+   - 最近修改时间（来自 `lastModified` 字段）
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx-update <other>`).
+   将最近修改的变更标记为 "(推荐)"，因为这很可能是用户想更新的。
 
-2. **Get the change's artifacts**
+   始终宣告："使用变更：<name>"，以及如何覆盖（例如 `/opsx-update <other>`）。
+
+2. **获取变更的制品**
    ```bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    ```
-   Parse the JSON to understand current state. The response includes:
-   - `schemaName`: The workflow schema being used (e.g., "spec-driven")
-   - `artifacts`: Array of artifacts with their status ("done", "skipped", "ready", "blocked")
-   - `isComplete`: Boolean indicating if all artifacts are complete
-   - `planningHome`, `changeRoot`, `artifactPaths`, and `actionContext`: path and scope context. Use these instead of assuming repo-local paths.
+   解析 JSON 以理解当前状态。响应包括：
+   - `schemaName`：使用的工作流 schema（例如 "spec-driven"）
+   - `artifacts`：制品数组及其状态（"done"、"skipped"、"ready"、"blocked"）
+   - `isPlanningComplete`：布尔值，表示所有规划制品是否已完成。较旧 CLI 版本以 `isComplete` 暴露相同值。
+   - `planningHome`、`changeRoot`、`artifactPaths` 和 `actionContext`：路径和作用域上下文。请使用这些值而非假设仓库本地路径。
 
-   The artifact ids and paths come from the active schema - do NOT assume them, and do NOT branch on hardcoded artifact names. Custom schemas must work unchanged.
+   制品 ID 和路径来自活动 schema — 不要假设它们，且不要基于硬编码的制品名称分支。自定义 schema 必须能不加修改地工作。
 
-   The files to edit are `artifactPaths.<id>.existingOutputPaths` - the concrete files that exist on disk, already glob-expanded for glob artifacts (e.g. `specs/**/*.md`). Do NOT write to `resolvedOutputPath`: for a glob artifact it is still the glob pattern, not a real file.
+   要编辑的文件是 `artifactPaths.<id>.existingOutputPaths` — 磁盘上存在的具体文件，已对 glob 制品（例如 `specs/**/*.md`）进行 glob 展开。不要写入 `resolvedOutputPath`：对于 glob 制品，它仍是 glob 模式，而非真实文件。
 
-3. **Understand the request**
-   - If the user asked for a specific revision ("the design now uses X"), that is the starting edit.
-   - If they only said "update" / "make this coherent", treat it as a coherence review: read the existing artifacts and check them against each other for contradictions, gaps, and duplication.
+3. **理解请求**
+   - 若用户请求了特定修订（"design 现在使用 X"），那是起始编辑点。
+   - 若他们仅说了 "update" / "make this coherent"，将其视为一致性审查：读取现有制品并相互检查矛盾、缺口和重复。
 
-4. **Read and reconcile**
-   - Read the artifact(s) the request touches and the change's other existing artifacts.
-   - Apply the requested edit. Then check every other existing artifact against it - in ANY direction: an edit to a later artifact may require revising an earlier one, not only the other way around. Build order is a useful reading order, not a constraint on which artifacts may be revised.
-   - Note everything that is now inconsistent, missing, or contradictory.
-   - Revise only files that already exist (`existingOutputPaths`). Do NOT create artifacts that don't exist yet, and do NOT invent new files under a glob artifact - note them and point the user to `/opsx-continue` to create them.
-   - If the change is already coherent, say so and make no edits.
+4. **读取并调和**
+   - 读取请求涉及的制品以及变更的其他现有制品。
+   - 应用请求的编辑。然后检查所有其他现有制品与其的一致性 — 在任何方向上：对后续制品的编辑可能需要修订前面的制品，而不仅仅是反过来。构建顺序是方便的阅读顺序，而非对哪些制品可被修订的约束。
+   - 记录所有现在不一致、缺失或矛盾的内容。
+   - 仅修订已存在的文件（`existingOutputPaths`）。不要创建尚不存在的制品，且不要在 glob 制品下创建新文件 — 指出它们并引导用户使用 `/opsx-continue` 来创建。
+   - 若变更已一致，说明情况且不做编辑。
 
-5. **Confirm and apply, one artifact at a time**
-   - Show each proposed revision and why. Write only after the user confirms.
-   - If the user rejects a revision, do not write it - leave that artifact unchanged.
-   - When a substantial rewrite is needed, get that artifact's rules and template first:
+5. **确认并应用，一次一个制品**
+   - 展示每个提议的修订及其原因。仅在用户确认后写入。
+   - 若用户拒绝修订，不要写入 — 保持该制品不变。
+   - 当需要重大重写时，先获取该制品的规则和模板：
      ```bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     openspec-cn instructions "<artifact-id>" --change "<name>" --json
      ```
 
-6. **Point to the next step (guidance only - NEVER act on it)**
-   - Artifacts still missing -> suggest `/opsx-continue` to create them.
-   - Change already implemented (tasks checked off / already applied) -> the code may no longer match the revised plan; suggest `/opsx-apply` to carry the delta into code.
-   - Everything done and implemented -> suggest `/opsx-archive`.
+6. **指出下一步（仅供参考 - 绝不要执行）**
+   - 制品仍缺失 -> 建议 `/opsx-continue` 来创建它们。
+   - 变更已实现（任务已勾选 / 已 apply） -> 代码可能不再匹配修订后的计划；建议 `/opsx-apply` 将增量带入代码。
+   - 一切完成且已实现 -> 建议 `/opsx-archive`。
 
-**Output**
+**输出**
 
-After each invocation, show:
-- Which artifacts were revised (and which proposed revisions were rejected)
-- Anything deferred to `/opsx-continue` (not-yet-created artifacts or files)
-- Where the change stands and the recommended next command
+每次调用后，展示：
+- 修订了哪些制品（以及哪些提议的修订被拒绝）
+- 推迟到 `/opsx-continue` 的任何内容（尚未创建的制品或文件）
+- 变更的状态及推荐的下一步命令
 
-**Guardrails**
-- Planning artifacts only - NEVER edit implementation code. If the revised plan implies code changes, stop and point to `/opsx-apply`.
-- Use the artifact ids and paths reported by `openspec status`; never branch on hardcoded artifact names.
-- Edit only the concrete files in `existingOutputPaths`; never write to a glob `resolvedOutputPath`.
-- Do not advance the build frontier: no new artifacts, no new files under glob artifacts - that is `/opsx-continue`'s job.
-- Confirm every edit with the user before writing.
-- If the request changes the change's *intent* rather than refining it, recommend starting fresh with `/opsx-new` (the "Update vs. Start Fresh" heuristic).
-- `/opsx-continue` and `/opsx-new` may not be installed (core profile). When suggesting one that is unavailable, point to the CLI instead: `openspec status --change "<name>" --json` shows the next artifact and `openspec instructions <artifact-id> --change "<name>" --json` explains how to create it.
+**护栏**
+- 仅规划制品 — 绝不要编辑实现代码。若修订后的计划暗示代码更改，停止并指向 `/opsx-apply`。
+- 使用 `openspec-cn status` 报告的制品 ID 和路径；绝不要基于硬编码的制品名称分支。
+- 仅编辑 `existingOutputPaths` 中的具体文件；绝不要写入 glob `resolvedOutputPath`。
+- 不要推进构建边界：不创建新制品，不在 glob 制品下创建新文件 — 那是 `/opsx-continue` 的职责。
+- 在写入前与用户确认每个编辑。
+- 若请求更改的是变更的*意图*而非细化，首先验证扩展 profile `/opsx-new` 工作流是否可用。若可用，建议用 `/opsx-new` 重新开始（"更新 vs 重新开始" 启发式）。若不可用，请求一个不同的未使用变更名称并建议改用 `openspec-cn new change "<new-change-name>"`。

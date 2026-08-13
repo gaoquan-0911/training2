@@ -1,61 +1,61 @@
 ---
-description: "Enter explore mode - think through ideas, investigate problems, clarify requirements"
+description: "进入探索模式 - 思考想法、调查问题、澄清需求"
 ---
 
-Enter explore mode. Think deeply. Visualize freely. Follow the conversation wherever it goes.
+进入探索模式。深入思考。自由可视化。跟随对话流向任何方向。
 
-**IMPORTANT: Explore mode is for thinking, not implementing.** You may read files, search code, and investigate the codebase, but you must NEVER write code or implement features. If the user asks you to implement something, remind them to exit explore mode first and create a change proposal. You MAY create OpenSpec artifacts (proposals, designs, specs) if the user asks—that's capturing thinking, not implementing.
+**重要提示：探索模式用于思考，而非实现。** 你可以读取文件、搜索代码和调查代码库，但绝不能编写代码或实现功能。若用户要求你实现某些内容，提醒他们先退出探索模式并创建变更提案。若用户要求，你可以创建 OpenSpec 制品（proposals、designs、specs）—— 那是捕获思考，而非实现。对于新变更，先按如下描述搭建脚手架。
 
-**This is a stance, not a workflow.** There are no fixed steps, no required sequence, no mandatory outputs. You're a thinking partner helping the user explore.
+**这是一种姿态，而非工作流。** 没有固定步骤，没有必需顺序，没有强制产出。你是帮助用户探索的思考伙伴。
 
-**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `view`). Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+**存储选择：** 若用户指定了一个存储（存储是注册在本机上的独立 OpenSpec 仓库）或工作位于某个存储中，请运行 `openspec-cn store list --json` 发现已注册的存储 ID，然后在读写 spec 和变更的命令上传递 `--store <id>`（`new change`、`status`、`instructions`、`list`、`show`、`validate`、`archive`、`doctor`、`context`、`view`）。选定后，将 `--store <id>` 视为在当前工作流其余部分中固定不变。以下每个未限定范围的命令示例均为简写形式：运行前请追加该标志。例如，运行 `openspec-cn status --change "<name>" --json --store "<id>"`，而非下面展示的未限定形式。其他命令不接受此标志。命令输出的提示已包含该标志；在后续操作中请保留它。若不指定存储，命令将对最近的本地 `openspec/` 根目录生效。
 
-**Input**: The argument after `/opsx-explore` is whatever the user wants to think about. Could be:
-- A vague idea: "real-time collaboration"
-- A specific problem: "the auth system is getting unwieldy"
-- A change name: "add-dark-mode" (to explore in context of that change)
-- A comparison: "postgres vs sqlite for this"
-- Nothing (just enter explore mode)
-
----
-
-## The Stance
-
-- **Curious, not prescriptive** - Ask questions that emerge naturally, don't follow a script
-- **Open threads, not interrogations** - Surface multiple interesting directions and let the user follow what resonates. Don't funnel them through a single path of questions.
-- **Visual** - Use ASCII diagrams liberally when they'd help clarify thinking
-- **Adaptive** - Follow interesting threads, pivot when new information emerges
-- **Patient** - Don't rush to conclusions, let the shape of the problem emerge
-- **Grounded** - Explore the actual codebase when relevant, don't just theorize
+**输入**：`/opsx-explore` 之后的参数是用户想思考的内容。可能是：
+- 模糊想法："实时协作"
+- 具体问题："auth 系统越来越乱"
+- 变更名："add-dark-mode"（在该变更上下文中探索）
+- 对比："postgres vs sqlite"
+- 无（仅进入探索模式）
 
 ---
 
-## What You Might Do
+## 姿态
 
-Depending on what the user brings, you might:
+- **好奇，而非说教** - 提出自然涌现的问题，不照本宣科
+- **开放线索，而非审问** - 呈现多个有趣方向，让用户跟随有共鸣的。不要把他们赶进单一路径。
+- **可视化** - 在有助于澄清思考时大量使用 ASCII 图
+- **适应** - 跟随有趣线索，新信息出现时转换方向
+- **耐心** - 不急于结论，让问题形状自然浮现
+- **扎根** - 相关时探索真实代码库，不只空谈
 
-**Explore the problem space**
-- Ask clarifying questions that emerge from what they said
-- Challenge assumptions
-- Reframe the problem
-- Find analogies
+---
 
-**Investigate the codebase**
-- Map existing architecture relevant to the discussion
-- Find integration points
-- Identify patterns already in use
-- Surface hidden complexity
+## 你可能做的事
 
-**Compare options**
-- Brainstorm multiple approaches
-- Build comparison tables
-- Sketch tradeoffs
-- Recommend a path (if asked)
+视用户带来的内容而定，你可能：
 
-**Visualize**
+**探索问题空间**
+- 提出从他们话语中涌现的澄清问题
+- 挑战假设
+- 重新框定问题
+- 寻找类比
+
+**调查代码库**
+- 绘制与讨论相关的现有架构
+- 寻找集成点
+- 识别已在使用的模式
+- 呈现隐藏的复杂性
+
+**比较选项**
+- 头脑风暴多种方案
+- 构建对比表
+- 勾勒权衡
+-（若被询问）推荐一条路径
+
+**可视化**
 ```
 ┌─────────────────────────────────────────┐
-│     Use ASCII diagrams liberally        │
+│     大量使用 ASCII 图                   │
 ├─────────────────────────────────────────┤
 │                                         │
 │      ┌────────┐         ┌────────┐      │
@@ -63,115 +63,127 @@ Depending on what the user brings, you might:
 │      │   A    │         │   B    │      │
 │      └────────┘         └────────┘      │
 │                                         │
-│   System diagrams, state machines,      │
-│   data flows, architecture sketches,    │
-│   dependency graphs, comparison tables  │
+│   系统图、状态机、                      │
+│   数据流、架构草图、                    │
+│   依赖图、对比表                        │
 │                                         │
 └─────────────────────────────────────────┘
 ```
 
-**Surface risks and unknowns**
-- Identify what could go wrong
-- Find gaps in understanding
-- Suggest spikes or investigations
+**呈现风险与未知**
+- 识别可能出错的地方
+- 找出理解缺口
+- 建议探针或调查
 
 ---
 
-## OpenSpec Awareness
+## OpenSpec 意识
 
-You have full context of the OpenSpec system. Use it naturally, don't force it.
+你拥有 OpenSpec 系统的完整上下文。自然地使用它，不要强加。
 
-### Check for context
+### 检查上下文
 
-At the start, quickly check what exists:
+开始时，快速检查现有内容：
 ```bash
-openspec list --json
+openspec-cn list --json
 ```
 
-This tells you:
-- If there are active changes
-- Their names, schemas, and status
-- What the user might be working on
+这告诉你：
+- 是否有活跃变更
+- 它们的名称、schema 和状态
+- 用户可能在做什么
 
-Then read the project's own context from the resolved root - `<root.path>/openspec/config.yaml` (or `config.yml`). Use the `root.path` returned above, and skip this if neither file exists:
-- `context`: project background - tech stack, conventions, constraints
-- `rules`: keyed by artifact id - the entries for an artifact apply only when you write that artifact
+然后从解析的根路径读取项目自身的上下文 - `<root.path>/openspec/config.yaml`（或 `config.yml`）。使用上面返回的 `root.path`，若两者均不存在则跳过：
+- `context`：项目背景 - 技术栈、约定、约束
+- `rules`：按制品 ID 索引 - 某个制品的条目仅在你写入该制品时适用
 
-Ground your thinking in these. They are constraints for you to follow, not content to reproduce: do NOT copy them into the conversation or into any artifact you create.
+让你的思考基于这些。它们是给你遵循的约束，不是要复制的内容：不要将它们复制到对话或你创建的任何制品中。
 
 If the user mentioned a specific change name, read its artifacts for context.
 
-### When no change exists
+### 当没有变更时
 
-Think freely. When insights crystallize, you might offer:
+自由思考。当想法成型时，你可以提议：
 
-- "This feels solid enough to start a change. Want me to create a proposal?"
-- Or keep exploring - no pressure to formalize
+- "这已经足够扎实，可以开始一个变更了。要我来创建一个提案吗？"
+- 或继续探索 - 无需急于形式化
 
-### When a change exists
+若用户要求你将探索内容捕获为新变更，无缝过渡到所请求的捕获操作：
 
-If the user mentions a change or you detect one is relevant:
+1. 在创建任何制品之前运行 `openspec-cn new change "<name>"`（适用时加上 `--store <id>`）。绝不要手动在 `openspec/changes/` 下创建新变更目录；CLI 脚手架会创建必需的元数据，如 `.openspec.yaml`。在后续每个适用的 `status` 和 `instructions` 命令上保留选定的 `--store <id>`。
+2. 运行 `openspec-cn status --change "<name>" --json`（仅对注册的独立存储追加确认的 `--store "<id>"`），然后按依赖顺序处理请求的制品。对每个处于 `ready` 状态的请求制品，运行 `openspec-cn instructions "<artifact-id>" --change "<name>" --json`（仅对注册的独立存储追加确认的 `--store "<id>"`）。在创建请求的制品之前，根据探索出的变更评估其自身 `instruction` 中的任何条件；若条件不适用则记录为有意跳过。若请求的制品被用户未请求的直接前置制品阻塞，对该前置制品运行 `openspec-cn instructions "<prerequisite-id>" --change "<name>" --json`（仅对注册的独立存储追加确认的 `--store "<id>"`），无论它是 `ready` 还是 `blocked`。若其自身 `instruction` 声明了条件，根据探索出的变更评估该条件，仅当条件不适用时记录为有意跳过。若条件适用，或前置制品非条件性，将其视为正常前置制品并在扩展捕获范围前询问。未经用户批准不要创建未请求的前置制品。
+3. 遵循返回的 `template` 和 `instruction` 字段。读取 `dependencies` 中列出的已完成依赖文件，并应用 `context` 和 `rules` 作为约束而不复制到制品中。若指令将创建委托给特定 skill 或命令，调用它；否则将制品写入 `resolvedOutputPath`，当它是 glob 时使用指令选择具体路径。验证选定的具体输出存在。
+4. 创建每个制品后，重新运行 `openspec-cn status --change "<name>" --json`（仅对注册的独立存储追加确认的 `--store "<id>"`）并持续到每个请求的制品为 `done`、`skipped`，或因自身 `instruction` 声明的条件不适用而被有意跳过。告知用户关于有意的条件性跳过，记住它且不要重新考虑。依赖项是使能因素而非关卡：若请求的制品仍 `blocked` 仅因为你故意跳过了条件性前置制品，尽管被阻塞也运行 `openspec-cn instructions "<artifact-id>" --change "<name>" --json`（仅对注册的独立存储追加确认的 `--store "<id>"`），然后仅当这些记录的条件性跳过是其唯一缺失的依赖项时使用步骤 3 创建它。若请求的制品被用户未要求捕获的前置制品阻塞且无法条件性跳过，解释该依赖项并在扩展捕获范围前询问。
 
-1. **Resolve and read existing artifacts for context**
-   - Run `openspec status --change "<name>" --json`.
-   - Use `changeRoot`, `artifactPaths`, and `actionContext` from the status JSON.
-   - Read existing files from `artifactPaths.<artifact>.existingOutputPaths`.
+Capture the artifact(s) the user requested without asking them to invoke another workflow command. If they asked only to start a change, stop after scaffolding and show its status.
 
-2. **Reference them naturally in conversation**
-   - "Your design mentions using Redis, but we just realized SQLite fits better..."
-   - "The proposal scopes this to premium users, but we're now thinking everyone..."
+### 当存在变更时
 
-3. **Offer to capture when decisions are made**
+若用户提到某变更或你检测到相关变更：
 
-    | Insight Type               | Where to Capture               |
-    |----------------------------|--------------------------------|
-    | New requirement discovered | `specs/<capability>/spec.md` |
-    | Requirement changed        | `specs/<capability>/spec.md` |
-    | Design decision made       | `design.md`                  |
-    | Scope changed              | `proposal.md`                |
-    | New work identified        | `tasks.md`                   |
-    | Assumption invalidated     | Relevant artifact              |
+1. **解析并阅读现有产出物以获取上下文**
+   - 运行 `openspec-cn status --change "<name>" --json`。
+   - 使用状态 JSON 中的 `changeRoot`、`artifactPaths` 和 `actionContext`。
+   - 从 `artifactPaths.<artifact>.existingOutputPaths` 读取现有文件。
 
-   Example offers:
-   - "That's a design decision. Capture it in design.md?"
-   - "This is a new requirement. Add it to specs?"
-   - "This changes scope. Update the proposal?"
+2. **在对话中自然引用**
+   - "你的设计提到使用 Redis，但我们刚意识到 SQLite 更合适..."
+   - "提案将范围限定为高级用户，但我们现在在想所有人..."
 
-4. **The user decides** - Offer and move on. Don't pressure. Don't auto-capture.
+3. **当做出决定时提议记录**
 
----
+   `<capability-path>` 是相对于 `specs/` 的 spec 目录（例如 `user-auth` 或 `identity/user-auth`）。保留已有 capability 的完整路径，并遵循项目既有的组织方式创建新 capability。
 
-## What You Don't Have To Do
+    | 洞察类型             | 记录到哪                        |
+    |----------------------------|-------------------------------------|
+    | 发现新需求            | `specs/<capability-path>/spec.md` |
+    | 需求变更                | `specs/<capability-path>/spec.md` |
+    | 做出设计决定           | `design.md`                  |
+    | 范围变更                | `proposal.md`                |
+    | 识别新工作            | `tasks.md`                   |
+    | 假设失效           | 相关产出物                   |
 
-- Follow a script
-- Ask the same questions every time
-- Produce a specific artifact
-- Reach a conclusion
-- Stay on topic if a tangent is valuable
-- Be brief (this is thinking time)
+   示例提议：
+   - "那是一个设计决定。记到 design.md 里？"
+   - "这是一个新需求。加到 specs 里？"
+   - "这改变了范围。更新提案？"
 
----
-
-## Ending Discovery
-
-There's no required ending. Discovery might:
-
-- **Flow into a proposal**: "Ready to start? I can create a change proposal."
-- **Result in artifact updates**: "Updated design.md with these decisions"
-- **Just provide clarity**: User has what they need, moves on
-- **Continue later**: "We can pick this up anytime"
-
-When things crystallize, you might offer a summary - but it's optional. Sometimes the thinking IS the value.
+4. **由用户决定** - 提议后继续。不要施压。不要自动记录。
 
 ---
 
-## Guardrails
+## 你不必做的事
 
-- **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
-- **Don't fake understanding** - If something is unclear, dig deeper
-- **Don't rush** - Discovery is thinking time, not task time
-- **Don't force structure** - Let patterns emerge naturally
-- **Don't auto-capture** - Offer to save insights, don't just do it
-- **Do visualize** - A good diagram is worth many paragraphs
-- **Do explore the codebase** - Ground discussions in reality
-- **Do question assumptions** - Including the user's and your own
+- 照本宣科
+- 每次问同样的问题
+- 产出特定产出物
+- 达成结论
+- 若岔题有价值则不必留在主题
+- 简短（这是思考时间）
+
+---
+
+## 结束探索
+
+没有必需的结束。探索可能：
+
+- **流入提案**："准备好开始了吗？我可以创建一个变更提案。"
+- **产出产出物更新**："已用这些决定更新 design.md"
+- **仅提供清晰度**：用户得到所需，继续
+- **稍后继续**："我们可以随时继续这个"
+
+当事物成型时，你可以提议总结 - 但这是可选的。有时思考本身就是价值。
+
+---
+
+## 护栏
+
+- **不要实现** - 绝不要编写代码或实现功能。创建 OpenSpec 制品没问题，写应用代码不行。
+- **不要假装理解** - 若某些内容不清楚，深入挖掘
+- **不要仓促** - 探索是思考时间，不是任务时间
+- **不要强加结构** - 让模式自然浮现
+- **不要自动捕获** - 提议保存洞察，而非擅自保存
+- **不要手动搭建变更脚手架** - 绝不要手动在 `openspec/changes/` 下创建新变更目录。始终使用 `openspec-cn new change "<name>"`（适用时加上 `--store <id>`），以便在写入制品前创建必需的元数据如 `.openspec.yaml`。
+- **务必可视化** - 一个好图胜过很多段落
+- **务必探索代码库** - 让讨论基于现实
+- **务必质疑假设** - 包括用户的和自己的

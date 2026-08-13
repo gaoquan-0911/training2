@@ -7,6 +7,18 @@
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
       "computedHash": "b2e8ef5ffc2f142022c1e1e1bba68073f0821356a8e1cf1b23670f61d13fe50b"
     },
+    "bug-investigator": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/bug-investigator/SKILL.md",
+      "computedHash": "cd328e57a8d087a29fb88d80481cf01122bd7ad8215216497ab0b72d7a38fb47"
+    },
+    "build-executor": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/build-executor/SKILL.md",
+      "computedHash": "3d52f4f4a533a1d8faf507f333f8aecacf8a1affc64269ad115c28aeb03d0134"
+    },
     "claude-handoff": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -19,11 +31,23 @@
       "skillPath": "skills/engineering/code-review/SKILL.md",
       "computedHash": "1d5e7242a98674635be79ab310cdda0e555d36a9903d2526ebf4263d0b7997ca"
     },
+    "code-reviewer": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/code-reviewer/SKILL.md",
+      "computedHash": "2a4147729408571de606d092ea28e34c4f22a063209f4c29348331feef8bad17"
+    },
     "codebase-design": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/codebase-design/SKILL.md",
       "computedHash": "e6394592ecf4b5aa5bc93f95a20d0a56314788bde2e1221f87296d3becb734a2"
+    },
+    "contract-builder": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/contract-builder/SKILL.md",
+      "computedHash": "30c491964554daeb1ec5764a9a1e2a2b12e10bfe339ac5d12ff8c9f892409bfb"
     },
     "diagnosing-bugs": {
       "source": "mattpocock/skills",
@@ -91,11 +115,23 @@
       "skillPath": "skills/misc/migrate-to-shoehorn/SKILL.md",
       "computedHash": "6397731ced114f3657aa88b55ed13d1344a56d77ca449c568e3200c21740fa99"
     },
+    "need-explorer": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/need-explorer/SKILL.md",
+      "computedHash": "9d5e01586c3cbcb9e8ad632fed5ef82a87e3a1d47d2f0f1e636ffe5fa169597e"
+    },
     "prototype": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/prototype/SKILL.md",
       "computedHash": "73862de6cd32acf30799bfb2220357b96c1a58ab0e3d01126b769fd659d6555a"
+    },
+    "release-archivist": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/release-archivist/SKILL.md",
+      "computedHash": "c4e3cf88ca6caa21a9e27be48b25dde6761b42290c4b87141c39f7ca79a5583c"
     },
     "research": {
       "source": "mattpocock/skills",
@@ -132,6 +168,18 @@
       "sourceType": "github",
       "skillPath": "skills/in-progress/setup-ts-deep-modules/SKILL.md",
       "computedHash": "bd5cbaa455454c2d6c27a1b734e0d820606da6c482bf3c79ec55fbc3f3e03ef3"
+    },
+    "spec-merger": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/spec-merger/SKILL.md",
+      "computedHash": "4f3415fd5fb8cd462484674656b6f084c96fc4af0f92c2e9b423d69b82ed4ff9"
+    },
+    "spec-writer": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/spec-writer/SKILL.md",
+      "computedHash": "5f4a99ea38297522f59a352be5ae92e4794ff3eb35722fac3609687b9bf05a33"
     },
     "tdd": {
       "source": "mattpocock/skills",
@@ -186,6 +234,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/wizard/SKILL.md",
       "computedHash": "2c0d1187398b1b7ebb9902a4c91b24181ee07892f285615b46c59f45e2c4229c"
+    },
+    "workflow-start": {
+      "source": "MageByte-Zero/spec-superflow",
+      "sourceType": "github",
+      "skillPath": "skills/workflow-start/SKILL.md",
+      "computedHash": "ef1899f0c40ad6aea0714e7575f0cea3ef3ac0ad27149983eed2a9c6d14ad981"
     },
     "writing-beats": {
       "source": "mattpocock/skills",

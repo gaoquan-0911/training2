@@ -1,150 +1,147 @@
 ---
-description: "Sync delta specs from a change to main specs"
+description: "将变更中的增量 spec 同步到主 spec"
 ---
 
-Sync delta specs from a change to main specs.
+将变更中的增量 spec 同步到主 spec。
 
-This is an **agent-driven** operation - you will read delta specs and directly edit main specs to apply the changes. This allows intelligent merging (e.g., adding a scenario without copying the entire requirement).
+这是一个**智能驱动**的操作 - 你将读取增量 spec 并直接编辑主 spec 以应用变更。这允许智能合并（例如，添加场景而不复制整个需求）。
 
-**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `view`). Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+**存储选择：** 若用户指定了一个存储（存储是注册在本机上的独立 OpenSpec 仓库）或工作位于某个存储中，请运行 `openspec-cn store list --json` 发现已注册的存储 ID，然后在读写 spec 和变更的命令上传递 `--store <id>`（`new change`、`status`、`instructions`、`list`、`show`、`validate`、`archive`、`doctor`、`context`、`view`）。选定后，将 `--store <id>` 视为在当前工作流其余部分中固定不变。以下每个未限定范围的命令示例均为简写形式：运行前请追加该标志。例如，运行 `openspec-cn status --change "<name>" --json --store "<id>"`，而非下面展示的未限定形式。其他命令不接受此标志。命令输出的提示已包含该标志；在后续操作中请保留它。若不指定存储，命令将对最近的本地 `openspec/` 根目录生效。
 
-**Input**: Optionally specify a change name after `/opsx-sync` (e.g., `/opsx-sync add-auth`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+`<capability-path>` 是相对于 `specs/` 的 spec 目录（例如 `user-auth` 或 `identity/user-auth`）。在解析主 spec 时保留每个增量 spec 的完整路径。
 
-**Steps**
+**输入**：可选地在 `/opsx-sync` 后指定变更名称（例如 `/opsx-sync add-auth`）。若省略，检查能否从对话上下文推断。若模糊或歧义，你必须提示用户从可用变更中选择。
 
-1. **Select the change**
+**步骤**
 
-   If a name is provided, use it. Otherwise:
-   - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, run `openspec list --json` to get available changes and ask the user to select one
+1. **选择变更**
 
-   When prompting, show changes that have delta specs (under `specs/` directory).
+   若提供了名称，使用它。否则：
+   - 从对话上下文推断（若用户提到了某个变更）
+   - 若仅有一个活跃变更则自动选择
+   - 若存在歧义，运行 `openspec-cn list --json` 获取可用变更并让用户选择
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx-sync <other>`).
+   提示时，显示有增量 spec（位于 `specs/` 目录下）的变更。
 
-2. **Resolve change context**
+   始终宣告："使用变更：<name>"，以及如何覆盖（例如 `/opsx-sync <other>`）。
 
-   Run:
+2. **解析变更上下文**
+
+   运行：
    ```bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    ```
 
-   The JSON includes `planningHome.root`. Main specs live under `<planningHome.root>/openspec/specs/` — use that (store-aware) root for every main-spec path below, not a hardcoded repo path. When a store is selected it points at the store, not the current repository.
+   JSON 包含 `planningHome.root`。主 spec 位于 `<planningHome.root>/openspec/specs/` 下 — 对下面的每个主 spec 路径使用该（存储感知的）根路径，而非硬编码的仓库路径。当选中存储时，它指向存储而非当前仓库。
 
-3. **Find delta specs**
+3. **查找增量 spec**
 
-   Use `artifactPaths.specs.existingOutputPaths` from the status JSON as the
-   only source of delta spec paths. If the `specs` entry is missing or
-   `existingOutputPaths` is empty, report that there are no delta specs to sync,
-   do not infer them from other artifacts, and stop without requesting artifact
-   instructions or writing a main spec.
+   将状态 JSON 中的 `artifactPaths.specs.existingOutputPaths` 作为增量 spec 路径的**唯一**来源。若 `specs` 条目缺失或 `existingOutputPaths` 为空，报告没有可同步的增量 spec，不要从其他制品推断，并在不请求制品指令或写入主 spec 的情况下停止。
 
-   Sync every path in `existingOutputPaths` unless the caller narrowed the set.
-   A caller narrows it by naming an explicit list of delta spec paths to sync —
-   archive does this inline, and a user can too ("only sync the billing delta").
-   Then sync only the named paths and leave the remaining delta specs untouched:
-   bulk archive excludes a delta whose implementation it could not find, and
-   syncing it anyway would write a main spec the caller deliberately withheld.
-   Carry that narrowed selection through step 4; never widen it back to the full
-   list. If a named path is not in `existingOutputPaths`, do not sync it —
-   report it and stop, rather than dropping it silently. If the named list is
-   empty, report that there is nothing to sync and stop without writing a main
-   spec.
+   同步 `existingOutputPaths` 中的每个路径，除非调用方缩小了范围。调用方通过指定来自 `existingOutputPaths` 的完整条目列表来缩小范围 — 逐字复制这些绝对路径值。Archive 会内联执行此操作，用户也可以（例如，通过选择以 `/specs/billing/invoices/spec.md` 结尾的条目）。然后仅同步指定的路径，保持其余增量 spec 不变：批量归档排除找不到其实现的增量 spec，同步它会写入调用方有意保留的主 spec。将缩小后的选择传递到步骤 4；永远不要将其扩展回完整列表。若指定的路径不在 `existingOutputPaths` 中，不要同步它 — 报告并停止，而非静默丢弃。若指定列表为空，报告没有可同步的内容并停止，不写入主 spec。
 
-   Each delta spec file contains sections like:
-   - `## ADDED Requirements` - New requirements to add
-   - `## MODIFIED Requirements` - Changes to existing requirements
-   - `## REMOVED Requirements` - Requirements to remove
-   - `## RENAMED Requirements` - Requirements to rename (FROM:/TO: format)
+   每个增量 spec 文件包含如下章节：
+   - `## ADDED Requirements` - 新增的需求
+   - `## MODIFIED Requirements` - 对现有需求的更改
+   - `## REMOVED Requirements` - 要移除的需求
+   - `## RENAMED Requirements` - 要重命名的需求（FROM:/TO: 格式）
 
-   If no delta specs found, inform user and stop.
+   若未找到增量 spec，告知用户并停止。
 
-4. **For each delta spec, apply changes to main specs**
+4. **对每个增量 spec，应用变更到主 spec**
 
-   Before the first main-spec write, obtain one current specs-rule snapshot:
-   - If archive invoked this workflow inline and supplied a valid snapshot from
-     `openspec instructions specs --change "<name>" --json`, reuse it and do not
-     fetch the same instructions again.
-   - Otherwise run that command once now with the same selected-root flags.
-   - If the direct lookup exits non-zero or returns invalid artifact-instruction
-     JSON, report the error and stop before writing any main spec. Do not treat the
-     failure as an absent rule set.
-   - A valid response with omitted `rules` means no artifact rules are configured
-     and the existing semantic merge continues.
+   在第一次主 spec 写入之前，获取一份当前的 specs-rule 快照：
+   - 若 archive 内联调用了此工作流并从 `openspec-cn instructions specs --change "<name>" --json` 提供了有效快照，复用它且不再次获取相同指令。
+   - 否则现在使用相同的选定根路径标志运行该命令一次。
+   - 若直接查找以非零退出或返回无效的制品指令 JSON，报告错误并在写入任何主 spec 之前停止。不要将失败视为缺少规则集。
+   - 省略 `rules` 的有效响应表示未配置制品规则，现有语义合并继续。
 
-   Apply returned `rules` only to the content and form of the main specs produced
-   by this merge. Artifact rules are not operation guidance and cannot change
-   selected roots, delta paths, CLI checks, or workflow steps. Use their text as
-   constraints without copying it verbatim into a main spec or summary.
+   仅将返回的 `rules` 应用于此合并生成的主 spec 的内容和形式。制品规则不是操作指导，不能更改选定的根路径、增量路径、CLI 检查或工作流步骤。使用其文本作为约束，而不逐字复制到主 spec 或摘要中。
 
-   For each capability delta spec path selected in step 3 — the full `existingOutputPaths` list, or the narrowed subset when a caller supplied one (these may belong to a selected store, not the repo):
+   对步骤 3 中选定的每个 capability 增量 spec 路径 — 完整的 `existingOutputPaths` 列表，或调用方提供时的缩小子集（这些可能属于选定的存储而非仓库）：
 
-   a. **Read the delta spec** to understand the intended changes
+   a. **读取增量 spec** 以理解预期的变更
 
-   b. **Read the main spec** at `<planningHome.root>/openspec/specs/<capability>/spec.md` (may not exist yet)
+   b. **读取主 spec** 位于 `<planningHome.root>/openspec/specs/<capability-path>/spec.md`（可能尚不存在）
 
-   c. **Apply changes intelligently**:
+   c. **智能应用变更**：
 
-      **ADDED Requirements:**
-      - If requirement doesn't exist in main spec → add it
-      - If requirement already exists → update it to match (treat as implicit MODIFIED)
+      **ADDED Requirements：**
+      - 若需求在主 spec 中不存在 → 添加它
+      - 若需求已存在 → 更新以匹配（视为隐式 MODIFIED）
 
-      **MODIFIED Requirements:**
-      - Find the requirement in main spec
-      - Apply the changes - this can be:
-        - Adding new scenarios (don't need to copy existing ones)
-        - Modifying existing scenarios
-        - Changing the requirement description
-      - Preserve scenarios/content not mentioned in the delta
+      **MODIFIED Requirements：**
+      - 在主 spec 中查找需求
+      - 应用变更 - 可以是：
+        - 添加主 spec 尚未有的新场景
+        - 修改现有场景
+        - 更改需求描述
+      - 保留增量 spec 中未提及的场景/内容
 
-      **REMOVED Requirements:**
-      - Remove the entire requirement block from main spec
+      **REMOVED Requirements：**
+      - 从主 spec 中移除整个需求块
+      - 退役 capability。仅当**全部**满足以下条件时，删除整个 `spec.md` — 以及目录（一旦其中无其他内容）：
+        1. 本次运行移除需求后没有剩余的需求块；
+        2. spec 的其余部分格式正确（仍有 `## Purpose`）；
+        3. 主 spec 在同步前并非空文件 — 如果你没有移除任何内容，不做更改；
+        4. 整个文件中所有其他非空行都被解释为标题、Purpose、Requirements 标题，或规范需求的陈述、场景或代码块示例；
+        5. 变更的 `.openspec.yaml` 声明了 `retire_capabilities: true`；
+        6. `spec.md` 解析后位于真实 specs 根目录内（不要跟随 capability 目录符号链接删除外部文件）。
+        若移除选定需求后没有需求块剩余且任何退役条件不满足，不要修改主 spec。停止该 capability 的同步，报告阻塞条件并告知用户如何解决。绝不要写入或留下空的 `## Requirements` 章节。当仅缺少标记时，也说明这一点 — 这是用户唯一可以添加以使退役通过的东西。
+      - 删除文件也删除了其 `## Purpose`；任何其他章节会阻塞退役。在报告退役时指出 Purpose。仅当 spec 位于调用方检出中时包含可粘贴的 `git checkout`；否则提供检出范围的恢复指导。
 
-      **RENAMED Requirements:**
-      - Find the FROM requirement, rename to TO
+      **RENAMED Requirements：**
+      - 查找 FROM 需求，重命名为 TO
 
-      **`## Purpose` in the delta:**
-      - The main spec already has one and it is authoritative - leave it alone
-        (this is what `openspec archive` does; it warns and moves on)
+      **增量 spec 中的 `## Purpose`：**
+      - 主 spec 已有一个且它是权威的 - 不要管它（这是 `openspec-cn archive` 的做法；它会警告然后继续）
 
-   d. **Create new main spec** if capability doesn't exist yet:
-      - Create `<planningHome.root>/openspec/specs/<capability>/spec.md`
-      - Add Purpose section: copy the delta's `## Purpose` body verbatim when it has one
-        (this is what `openspec archive` does); only write a brief TBD placeholder when it does not
-      - Add Requirements section with the ADDED requirements
-      - Follow the **Main Spec Format Reference** below
+   d. **若 capability 尚不存在则创建新主 spec**：
+      - 创建 `<planningHome.root>/openspec/specs/<capability-path>/spec.md`
+      - 添加 Purpose 章节：当增量 spec 有 `## Purpose` 时逐字复制其正文（这是 `openspec-cn archive` 的做法）；没有时仅写一个简短的 TBD 占位符
+      - 添加 Requirements 章节及 ADDED 需求
+      - 遵循下方的 **主 Spec 格式参考**
 
-5. **Show summary**
+5. **验证更新后的主 spec**
 
-   After applying all changes, summarize:
-   - Which capabilities were updated
-   - What changes were made (requirements added/modified/removed/renamed)
-   - Any new main spec left with a TBD Purpose placeholder, so it gets written
-     now rather than lingering
+   使用与之前相同的选定根路径标志运行 `openspec-cn validate --specs`。若验证失败，报告问题且不要声称同步成功。
 
-**Delta Spec Format Reference**
+6. **显示摘要**
+
+   应用所有变更后，总结：
+   - 更新了哪些 capability
+   - 进行了哪些变更（需求添加/修改/移除/重命名）
+   - 任何留有 TBD Purpose 占位符的新主 spec，以便立即写入而非遗留
+   - 任何已退役的 capability，指出已删除的 `spec.md`、其 Purpose，以及可粘贴的 `git checkout` 或检出范围的恢复指导
+
+**增量 Spec 格式参考**
 
 ```markdown
 ## Purpose
 
-Only on a delta that introduces a brand-new capability. Seeds the new main spec.
+仅用于引入全新 capability 的增量 spec。为新的主 spec 提供种子。
 
 ## ADDED Requirements
 
 ### Requirement: New Feature
-The system SHALL do something new.
+系统应当执行某些新操作。
 
 #### Scenario: Basic case
-- **WHEN** user does X
-- **THEN** system does Y
+- **WHEN** 用户执行 X
+- **THEN** 系统执行 Y
 
 ## MODIFIED Requirements
 
 ### Requirement: Existing Feature
+系统应当继续执行现有操作，现在还需处理 A。
+
+#### Scenario: Scenario the main spec already has
+- **WHEN** 用户执行 X
+- **THEN** 系统执行 Y
+
 #### Scenario: New scenario to add
-- **WHEN** user does A
-- **THEN** system does B
+- **WHEN** 用户执行 A
+- **THEN** 系统执行 B
 
 ## REMOVED Requirements
 
@@ -156,60 +153,60 @@ The system SHALL do something new.
 - TO: `### Requirement: New Name`
 ```
 
-**Main Spec Format Reference**
+**主 Spec 格式参考**
 
-Main specs are what the delta merges INTO. They must never contain delta operation headers (`## ADDED/MODIFIED/REMOVED/RENAMED Requirements`) - after syncing, every requirement lives under a single `## Requirements` section:
+主 spec 是增量 spec 合并到的目标。它们绝不能包含增量操作标题（`## ADDED/MODIFIED/REMOVED/RENAMED Requirements`）—— 同步后，每个需求都应位于单一的 `## Requirements` 章节下：
 
 ```markdown
 # <capability> Specification
 
 ## Purpose
-Short description of what this capability does and why it exists.
+该 capability 做什么以及为何存在的简要描述。
 
 ## Requirements
 
 ### Requirement: New Feature
-The system SHALL do something new.
+系统应当执行某些新操作。
 
 #### Scenario: Basic case
-- **WHEN** user does X
-- **THEN** system does Y
+- **WHEN** 用户执行 X
+- **THEN** 系统执行 Y
 ```
 
-**Key Principle: Intelligent Merging**
+**核心原则：智能合并**
 
-Unlike programmatic merging, you can apply **partial updates**:
-- To add a scenario, just include that scenario under MODIFIED - don't copy existing scenarios
-- The delta represents *intent*, not a wholesale replacement
-- Use your judgment to merge changes sensibly
+与程序化合并不同，你进行的是合并而非覆盖：
+- MODIFIED 块包含完整的需求 — 正文以及所有在变更后保留的场景。`openspec-cn validate` 和 `openspec-cn archive` 都会拒绝丢弃主 spec 仍具有的场景。
+- 保留增量 spec 中未提及的任何内容，按主 spec 的现有顺序排列
+- 运用你的判断力合理合并变更
 
-**Output On Success**
+**成功时输出**
 
 ```markdown
 ## Specs Synced: <change-name>
 
-Updated main specs:
+已更新主 specs：
 
-**<capability-1>**:
-- Added requirement: "New Feature"
-- Modified requirement: "Existing Feature" (added 1 scenario)
+**<capability-1>**：
+- 已添加需求："New Feature"
+- 已修改需求："Existing Feature"（添加了 1 个场景）
 
-**<capability-2>**:
-- Created new spec file
-- Added requirement: "Another Feature"
+**<capability-2>**：
+- 已创建新 spec 文件
+- 已添加需求："Another Feature"
 
-Main specs are now updated. The change remains active - archive when implementation is complete.
+主 specs 现已更新。变更保持活跃 - 实现完成后归档。
 ```
 
-**Guardrails**
-- Read both delta and main specs before making changes
-- Preserve existing content not mentioned in delta
-- Never copy a delta file into a main spec as-is - merge its content so the main spec keeps the Main Spec Format Reference structure, with no delta operation headers
-- If something is unclear, ask for clarification
-- Show what you're changing as you go
-- The operation should be idempotent - running twice should give same result
-- Use only `artifactPaths.specs.existingOutputPaths`; never infer delta specs from unrelated artifacts
-- Honor a caller-supplied subset of `existingOutputPaths`; never widen it back to the full list
-- Fetch specs instructions once for direct sync, or reuse the archive-supplied snapshot inline
-- Stop before every main-spec write on a non-zero or invalid JSON specs-instruction response
-- Artifact rules constrain only the specs being written and are never copied into output files
+**护栏**
+- 在进行变更之前阅读增量 spec 和主 spec
+- 保留增量 spec 中未提及的现有内容
+- 绝不要将增量 spec 文件原样复制到主 spec 中 — 合并其内容以使主 spec 保持主 Spec 格式参考的结构，没有增量操作标题
+- 若某些内容不清晰，请求澄清
+- 在进行过程中展示你正在做的更改
+- 操作应是幂等的 — 运行两次应得到相同结果
+- 仅使用 `artifactPaths.specs.existingOutputPaths`；绝不要从不相关的制品推断增量 spec
+- 遵循调用方提供的 `existingOutputPaths` 子集；绝不要将其扩展回完整列表
+- 直接同步时获取一次 specs 指令，或内联复用 archive 提供的快照
+- 在每次主 spec 写入之前，对非零或无效的 JSON specs-instruction 响应停止
+- 制品规则仅约束正在编写的 specs，绝不要复制到输出文件中
